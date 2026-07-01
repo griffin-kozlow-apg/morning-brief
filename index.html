@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Morning Brief">
+<meta name="theme-color" content="#0a1330">
+<meta name="robots" content="noindex, nofollow">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png">
+<title>Morning Brief</title>
+<style>
+:root{color-scheme:light;
+--bg:#f5f5f7;--card:#ffffff;--ink:#1d1d1f;--mut:#6e6e73;--line:#e5e5ea;
+--grn:#1a8f5a;--red:#d1342f;--blue:#0a6cff;--amber:#b5761b;
+--tagP:#eaf2ff;--tagPc:#0a5bd6;--tagM:#fff2e0;--tagMc:#b5761b;--tagW:#efeaff;--tagWc:#6b46d9;}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--ink);
+font:16px/1.5 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;
+padding:0 0 40px;max-width:560px;margin:0 auto;-webkit-font-smoothing:antialiased}
+/* ---------- lock screen ---------- */
+#lock{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;
+padding:24px 24px calc(24px + env(safe-area-inset-bottom));text-align:center}
+#lock img{width:76px;height:76px;border-radius:18px;box-shadow:0 6px 20px rgba(10,19,48,.25);margin-bottom:18px}
+#lock h1{font-size:22px;font-weight:700;letter-spacing:-.3px}
+#lock .sub{color:var(--mut);font-size:14px;margin:4px 0 22px}
+.field{width:100%;max-width:320px}
+#pw{width:100%;padding:14px 16px;font-size:16px;border:1px solid var(--line);border-radius:12px;background:#fff;text-align:center;-webkit-appearance:none}
+#pw:focus{outline:none;border-color:var(--blue)}
+.btn{width:100%;max-width:320px;padding:14px;font-size:16px;font-weight:650;border:none;border-radius:12px;margin-top:10px;cursor:pointer;-webkit-appearance:none}
+.btn.primary{background:var(--ink);color:#fff}
+.btn.faceid{background:#0a6cff;color:#fff;display:none;align-items:center;justify-content:center;gap:8px}
+.btn.ghost{background:transparent;color:var(--blue);font-weight:600;margin-top:14px}
+.err{color:var(--red);font-size:13.5px;font-weight:600;margin-top:12px;min-height:18px}
+.hint{color:var(--mut);font-size:12px;margin-top:18px;max-width:300px;line-height:1.5}
+/* ---------- brief (post-unlock) ---------- */
+#app{display:none}
+.wrap{padding:calc(20px + env(safe-area-inset-top)) 16px 0}
+.eyebrow{font-size:12px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;color:var(--mut)}
+h1.title{font-size:28px;font-weight:700;letter-spacing:-.5px;margin:2px 0 2px}
+.date{color:var(--mut);font-size:14px;margin-bottom:16px}
+.lockbtn{float:right;font-size:12px;font-weight:600;color:var(--mut);background:#eef0f2;border:none;border-radius:20px;padding:5px 11px;cursor:pointer;margin-top:4px}
+.snap{background:var(--card);border-radius:18px;padding:18px;border:1px solid var(--line);box-shadow:0 1px 3px rgba(0,0,0,.04);margin-bottom:22px}
+.snap .val{font-size:32px;font-weight:700;letter-spacing:-.8px;font-variant-numeric:tabular-nums}
+.snap .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;align-items:center}
+.pill{font-size:13px;font-weight:600;padding:4px 10px;border-radius:20px;font-variant-numeric:tabular-nums}
+.pill.up{background:#e7f6ee;color:var(--grn)}.pill.dn{background:#fdeceb;color:var(--red)}.pill.mut{background:#eef0f2;color:var(--mut)}
+.snap .lbl{font-size:12px;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px}
+.idx{display:flex;gap:8px;margin-bottom:24px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:2px}
+.idx .chip{flex:0 0 auto;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 13px;min-width:104px}
+.idx .n{font-size:12px;color:var(--mut);font-weight:600}.idx .p{font-size:16px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:2px}
+.idx .d{font-size:12px;font-weight:600;font-variant-numeric:tabular-nums;margin-top:1px}
+.sec{font-size:13px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--mut);margin:0 4px 12px}
+.item{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 16px 15px;margin-bottom:12px;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+.item .top{display:flex;align-items:center;gap:9px;margin-bottom:7px}
+.num{flex:0 0 auto;width:24px;height:24px;border-radius:8px;background:var(--ink);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.tag{font-size:10.5px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;padding:3px 8px;border-radius:6px}
+.tag.P{background:var(--tagP);color:var(--tagPc)}.tag.M{background:var(--tagM);color:var(--tagMc)}.tag.W{background:var(--tagW);color:var(--tagWc)}
+.item h3{font-size:16px;font-weight:650;letter-spacing:-.2px;line-height:1.35;margin-bottom:5px}
+.item p{font-size:14.5px;color:#3a3a3c;line-height:1.5}.item .tk{font-weight:650;color:var(--ink)}
+.up-t{color:var(--grn);font-weight:650}.dn-t{color:var(--red);font-weight:650}
+.foot{color:var(--mut);font-size:12px;line-height:1.5;text-align:center;padding:18px 20px calc(10px + env(safe-area-inset-bottom));border-top:1px solid var(--line);margin-top:24px}
+.foot .big{font-weight:600;color:#48484a}
+/* face id enable prompt */
+#faceEnroll{display:none;background:#eef4ff;border:1px solid #d5e3ff;border-radius:14px;padding:14px;margin:0 0 18px;text-align:center}
+#faceEnroll p{font-size:13.5px;color:#274b8c;margin-bottom:10px}
+#faceEnroll button{background:#0a6cff;color:#fff;border:none;border-radius:10px;padding:9px 16px;font-size:14px;font-weight:600;cursor:pointer}
+#faceEnroll .no{background:transparent;color:#6e6e73;margin-left:6px}
+</style>
+</head>
+<body>
+<!-- encrypted payload (base64 fields) injected by the encryptor -->
+<script id="payload" type="application/json">{"salt":"DTte9wrHyhh/BDIMOpTzxA==","iv":"9udbGH6WYAzyv2CJ","ct":"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","iter":250000}</script>
+
+<section id="lock">
+  <img src="icon-192.png" alt="">
+  <h1>Morning Brief</h1>
+  <div class="sub">Enter your passphrase to unlock</div>
+  <div class="field">
+    <input id="pw" type="password" inputmode="text" autocomplete="current-password" placeholder="Passphrase" enterkeyhint="go">
+    <button class="btn primary" id="unlock">Unlock</button>
+    <button class="btn faceid" id="faceUnlock">ð Unlock with Face ID</button>
+    <button class="btn ghost" id="forget" style="display:none">Use passphrase instead</button>
+  </div>
+  <div class="err" id="err"></div>
+  <div class="hint">Your data is end-to-end encrypted. Only this passphrase can decrypt it â it never leaves your device and isn't stored anywhere online.</div>
+</section>
+
+<main id="app"></main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const b64d = (s) => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+const b64e = (buf) => btoa(String.fromCharCode(...new Uint8Array(buf)));
+const PRF_SALT = new TextEncoder().encode('morning-brief-prf-v1');
+const LS_KEY = 'mb_faceid_v1';
+
+async function deriveKey(pw, salt, iter) {
+  const km = await crypto.subtle.importKey('raw', new TextEncoder().encode(pw), 'PBKDF2', false, ['deriveKey']);
+  return crypto.subtle.deriveKey({ name: 'PBKDF2', salt, iterations: iter, hash: 'SHA-256' },
+    km, { name: 'AES-GCM', length: 256 }, false, ['decrypt']);
+}
+async function decryptBrief(pw) {
+  const p = JSON.parse($('payload').textContent);
+  const key = await deriveKey(pw, b64d(p.salt), p.iter);
+  const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64d(p.iv) }, key, b64d(p.ct));
+  return new TextDecoder().decode(pt);
+}
+function reveal(html) {
+  $('app').innerHTML = html;
+  $('lock').style.display = 'none';
+  $('app').style.display = 'block';
+  maybeOfferFaceEnroll();
+  window.scrollTo(0, 0);
+}
+async function doPasswordUnlock() {
+  const pw = $('pw').value;
+  if (!pw) return;
+  $('err').textContent = '';
+  $('unlock').textContent = 'Unlockingâ¦';
+  try {
+    const html = await decryptBrief(pw);
+    window.__pw = pw;               // held in memory only, for optional Face ID enroll
+    reveal(html);
+  } catch (e) {
+    $('err').textContent = 'Wrong passphrase. Try again.';
+    $('unlock').textContent = 'Unlock';
+  }
+}
+
+/* ---------- Face ID via WebAuthn PRF ---------- */
+function faceIdSupported() { return !!(window.PublicKeyCredential && navigator.credentials && location.protocol === 'https:'); }
+function faceIdEnrolled() { return !!localStorage.getItem(LS_KEY); }
+
+async function getPRF(credId) {
+  const assn = await navigator.credentials.get({ publicKey: {
+    challenge: crypto.getRandomValues(new Uint8Array(32)),
+    allowCredentials: [{ type: 'public-key', id: credId }],
+    userVerification: 'required',
+    timeout: 60000,
+    extensions: { prf: { eval: { first: PRF_SALT } } }
+  }});
+  const r = assn.getClientExtensionResults();
+  if (!r.prf || !r.prf.results || !r.prf.results.first) throw new Error('prf-unavailable');
+  return new Uint8Array(r.prf.results.first);
+}
+async function aesKeyFromRaw(raw) {
+  return crypto.subtle.importKey('raw', raw, { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']);
+}
+async function enrollFaceID(pw) {
+  const cred = await navigator.credentials.create({ publicKey: {
+    challenge: crypto.getRandomValues(new Uint8Array(32)),
+    rp: { name: 'Morning Brief', id: location.hostname },
+    user: { id: crypto.getRandomValues(new Uint8Array(16)), name: 'griffin', displayName: 'Griffin' },
+    pubKeyCredParams: [{ type: 'public-key', alg: -7 }, { type: 'public-key', alg: -257 }],
+    authenticatorSelection: { authenticatorAttachment: 'platform', userVerification: 'required', residentKey: 'required' },
+    timeout: 60000,
+    extensions: { prf: {} }
+  }});
+  const credId = cred.rawId;
+  const secret = await getPRF(credId);                 // triggers Face ID once to read PRF
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const key = await aesKeyFromRaw(secret);
+  const enc = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, new TextEncoder().encode(pw));
+  localStorage.setItem(LS_KEY, JSON.stringify({ credId: b64e(credId), enc: b64e(enc), iv: b64e(iv) }));
+}
+async function unlockWithFaceID() {
+  const st = JSON.parse(localStorage.getItem(LS_KEY));
+  const secret = await getPRF(b64d(st.credId));
+  const key = await aesKeyFromRaw(secret);
+  const pwBuf = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64d(st.iv) }, key, b64d(st.enc));
+  const pw = new TextDecoder().decode(pwBuf);
+  const html = await decryptBrief(pw);
+  reveal(html);
+}
+function maybeOfferFaceEnroll() {
+  if (!faceIdSupported() || faceIdEnrolled() || !window.__pw) return;
+  const box = document.createElement('div');
+  box.id = 'faceEnroll';
+  box.style.display = 'block';
+  box.innerHTML = '<p>Unlock faster next time with Face ID?</p>' +
+    '<button id="enrollYes">Enable Face ID</button><button class="no" id="enrollNo">Not now</button>';
+  const wrap = $('app').querySelector('.wrap') || $('app');
+  wrap.insertBefore(box, wrap.firstChild);
+  $('enrollYes').onclick = async () => {
+    box.querySelector('p').textContent = 'Setting upâ¦';
+    try { await enrollFaceID(window.__pw); box.innerHTML = '<p>â Face ID enabled for this device.</p>'; setTimeout(() => box.remove(), 2500); }
+    catch (e) { box.innerHTML = '<p>Face ID setup not available on this device/browser. Passphrase still works.</p>'; setTimeout(() => box.remove(), 4000); }
+  };
+  $('enrollNo').onclick = () => box.remove();
+}
+
+/* ---------- wire up ---------- */
+$('unlock').onclick = doPasswordUnlock;
+$('pw').addEventListener('keydown', (e) => { if (e.key === 'Enter') doPasswordUnlock(); });
+
+(function init() {
+  if (faceIdSupported() && faceIdEnrolled()) {
+    const fb = $('faceUnlock');
+    fb.style.display = 'flex';
+    fb.onclick = async () => {
+      $('err').textContent = '';
+      try { await unlockWithFaceID(); }
+      catch (e) { $('err').textContent = 'Face ID cancelled or unavailable â use your passphrase.'; }
+    };
+    $('forget').style.display = 'block';
+    $('forget').onclick = () => { $('faceUnlock').style.display = 'none'; $('forget').style.display = 'none'; $('pw').focus(); };
+    // auto-prompt Face ID on load
+    setTimeout(() => fb.click(), 400);
+  } else {
+    $('pw').focus();
+  }
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+})();
+</script>
+</body>
+</html>
